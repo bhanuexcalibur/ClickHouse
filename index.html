@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClickHouse × Bhanu Excalibur · Industry Marketing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+:root{
+  --bg:    #05070a;
+  --bg2:   #090b10;
+  --bg3:   #0d1018;
+  --bg4:   #121620;
+  --bg5:   #181d28;
+  --bdr:   rgba(255,255,255,0.055);
+  --bmd:   rgba(255,255,255,0.10);
+  --blg:   rgba(255,255,255,0.18);
+  --t1:    #edf0f7;
+  --t2:    #7c8699;
+  --t3:    #333d52;
+  --ch:    #FFCC00;
+  --ch-d:  rgba(255,204,0,0.10);
+  --ch-g:  rgba(255,204,0,0.16);
+  --ch-t:  #FFE566;
+  --cy:    #00C4CC;
+  --cy-d:  rgba(0,196,204,0.09);
+  --cy-t:  #5EEDEE;
+  --grn:   #3dd68c;
+  --grn-d: rgba(61,214,140,0.09);
+  --grn-t: #76e8ae;
+  --red:   #f47878;
+  --red-d: rgba(244,120,120,0.09);
+}
+
+html{scroll-behavior:smooth;scroll-padding-top:58px;}
+body{
+  background:var(--bg);color:var(--t1);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:16px;line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.018'/%3E%3C/svg%3E");
+}
+
+#rbar{position:fixed;top:0;left:0;height:2px;background:var(--ch);z-index:999;width:0;transition:width .09s linear;}
+
+/* ====== NAV ====== */
+.nav{
+  position:sticky;top:0;z-index:400;
+  background:rgba(5,7,10,0.94);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--bdr);padding:0 5vw;
+}
+.nav-i{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;gap:16px;
+}
+.nav-brand{
+  display:flex;align-items:center;gap:9px;flex-shrink:0;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:var(--t3);letter-spacing:0.06em;
+}
+.nav-spark{display:flex;align-items:flex-end;gap:2px;height:12px;}
+.nav-spark span{display:block;background:var(--ch);border-radius:1px;animation:spk 1.7s ease-in-out infinite;}
+.nav-spark span:nth-child(1){width:3px;height:5px;animation-delay:0s;}
+.nav-spark span:nth-child(2){width:3px;height:11px;animation-delay:.18s;}
+.nav-spark span:nth-child(3){width:3px;height:7px;animation-delay:.36s;}
+.nav-spark span:nth-child(4){width:3px;height:12px;animation-delay:.08s;}
+@keyframes spk{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-brand b{color:var(--ch);font-weight:500;}
+
+.nav-links{display:flex;gap:1px;}
+.nl{
+  font-size:11.5px;font-weight:500;
+  padding:5px 11px;border-radius:6px;
+  border:1px solid transparent;
+  color:var(--t2);background:transparent;
+  text-decoration:none;transition:all 0.12s;white-space:nowrap;
+}
+.nl:hover{border-color:var(--bdr);color:var(--t1);}
+.nl.cta{background:var(--ch-d);border-color:rgba(255,204,0,0.22);color:var(--ch-t);font-weight:600;}
+.nl.cta:hover{background:rgba(255,204,0,0.15);}
+
+.hbg{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;flex-shrink:0;}
+.hbg span{display:block;width:20px;height:1.5px;background:var(--t1);border-radius:2px;transition:transform .26s,opacity .26s;}
+.hbg.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.hbg.open span:nth-child(2){opacity:0;}
+.hbg.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+.mob-menu{
+  display:none;position:fixed;inset:0;top:56px;
+  background:var(--bg);z-index:390;
+  flex-direction:column;padding:24px 5vw;
+  border-top:1px solid var(--bdr);
+}
+.mob-menu.open{display:flex;}
+.mob-menu a{display:block;font-size:17px;font-weight:600;color:var(--t1);text-decoration:none;padding:13px 0;border-bottom:1px solid var(--bdr);}
+.mob-menu a.mct{color:var(--ch-t);border-bottom:none;margin-top:8px;}
+@media(max-width:780px){.nav-links{display:none;}.hbg{display:flex;}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:1200px;margin:0 auto;padding:0 5vw;position:relative;z-index:1;}
+section{padding:80px 0;border-bottom:1px solid var(--bdr);}
+section:last-of-type{border-bottom:none;}
+
+.sec-eye{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:0.13em;text-transform:uppercase;
+  color:var(--ch-t);display:flex;align-items:center;gap:8px;margin-bottom:20px;
+}
+.sec-eye::before{content:'';display:block;width:16px;height:1px;background:var(--ch);}
+.sec-h{
+  font-family:'Sora',sans-serif;
+  font-size:clamp(22px,2.9vw,34px);font-weight:700;
+  color:var(--t1);line-height:1.22;margin-bottom:14px;letter-spacing:-0.01em;
+}
+.sec-sub{font-size:15px;color:var(--t2);line-height:1.78;max-width:640px;}
+
+/* ====================================================
+   HERO
+   ==================================================== */
+.hero{
+  padding:80px 5vw 64px;
+  max-width:1200px;margin:0 auto;
+  position:relative;z-index:1;
+}
+
+.hero-top{
+  display:grid;grid-template-columns:1fr 1.05fr;gap:56px;
+  align-items:center;padding-bottom:60px;border-bottom:1px solid var(--bdr);
+}
+@media(max-width:900px){.hero-top{grid-template-columns:1fr;gap:36px;}}
+
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--cy-t);background:var(--cy-d);
+  border:1px solid rgba(0,196,204,0.16);
+  padding:5px 12px;border-radius:100px;margin-bottom:26px;
+}
+.ey-dot{width:5px;height:5px;border-radius:50%;background:var(--cy);animation:spk 2s ease-in-out infinite;}
+
+.hero-h{
+  font-family:'Sora',sans-serif;
+  font-size:clamp(40px,5.8vw,72px);
+  font-weight:800;line-height:1.01;
+  letter-spacing:-0.03em;color:var(--t1);margin-bottom:22px;
+}
+.hero-h em{
+  font-style:normal;
+  background:linear-gradient(118deg,var(--ch-t) 0%,var(--ch) 55%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+.hero-sub{
+  font-size:clamp(14px,1.6vw,16px);color:var(--t2);
+  line-height:1.75;max-width:460px;margin-bottom:32px;
+}
+
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.hbtn{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:13px;font-weight:600;
+  padding:10px 22px;border-radius:7px;
+  text-decoration:none;transition:all 0.13s;
+}
+.hbtn.pri{background:var(--ch);color:#05070a;}
+.hbtn.pri:hover{opacity:0.87;}
+.hbtn.ghost{background:transparent;border:1px solid var(--bmd);color:var(--t2);}
+.hbtn.ghost:hover{border-color:var(--blg);color:var(--t1);}
+
+
+/* ====================================================
+   HERO INTERACTIVE: QUERY SPEED RACER
+   ====================================================
+   Drag the "row count" slider. Two "query bars" race
+   side by side — ClickHouse vs. a row-store database.
+   The millisecond gap widens dramatically as rows increase.
+   No labels needed: the interaction communicates the product value.
+   
+   Performance: all animation is CSS transform/opacity only.
+   JS uses requestAnimationFrame with one DOM write per frame.
+   will-change applied only to the two bars during animation.
+   ==================================================== */
+.qr-widget{
+  background:var(--bg2);border:1px solid var(--bmd);
+  border-radius:12px;overflow:hidden;
+  user-select:none;-webkit-user-select:none;
+}
+
+/* top chrome bar */
+.qr-chrome{
+  display:flex;align-items:center;gap:7px;
+  padding:10px 14px;border-bottom:1px solid var(--bdr);
+  background:var(--bg3);
+}
+.qr-chrome-dot{width:8px;height:8px;border-radius:50%;}
+.qr-chrome-dot.d1{background:#f47878;}
+.qr-chrome-dot.d2{background:var(--ch);}
+.qr-chrome-dot.d3{background:var(--grn);}
+.qr-chrome-title{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--t3);letter-spacing:0.06em;margin-left:6px;
+}
+
+/* query display */
+.qr-sql{
+  padding:14px 16px 10px;
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  line-height:1.7;border-bottom:1px solid var(--bdr);
+  white-space:nowrap;overflow:hidden;
+}
+.kw{color:var(--ch-t);}
+.fn{color:var(--cy-t);}
+.tbl{color:var(--grn-t);}
+.num{color:var(--ch);}
+.qr-row-count{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:var(--ch);font-weight:500;
+  display:inline-block;min-width:40px;text-align:left;
+}
+
+/* slider section */
+.qr-slider-wrap{
+  padding:14px 16px 10px;border-bottom:1px solid var(--bdr);
+}
+.qr-slider-label{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:8px;
+}
+.qr-slider-label span{
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  color:var(--t3);letter-spacing:0.08em;text-transform:uppercase;
+}
+.qr-slider-label .qr-val{color:var(--ch-t);}
+
+input[type=range].qr-range{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:4px;border-radius:2px;
+  background:var(--bg4);outline:none;cursor:pointer;
+}
+input[type=range].qr-range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--ch);border:2px solid var(--bg2);
+  box-shadow:0 0 8px rgba(255,204,0,0.4);
+  cursor:grab;transition:transform .1s;
+}
+input[type=range].qr-range::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.15);}
+input[type=range].qr-range::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;
+  background:var(--ch);border:2px solid var(--bg2);
+  cursor:grab;
+}
+
+/* race lanes */
+.qr-lanes{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;}
+.qr-lane{display:flex;flex-direction:column;gap:5px;}
+.qr-lane-header{display:flex;align-items:center;justify-content:space-between;}
+.qr-lane-name{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:0.07em;display:flex;align-items:center;gap:6px;
+}
+.qr-lane-name .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot-ch{background:var(--ch);}
+.dot-rs{background:var(--t3);}
+.qr-lane-name.ch-name{color:var(--ch-t);}
+.qr-lane-name.rs-name{color:var(--t3);}
+.qr-ms{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
+  min-width:54px;text-align:right;
+}
+.qr-ms.fast{color:var(--grn-t);}
+.qr-ms.slow{color:var(--red);}
+.qr-track{
+  height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;
+}
+.qr-bar{
+  height:100%;border-radius:4px;
+  transform-origin:left center;
+  transform:scaleX(0);
+  transition:transform 0.55s cubic-bezier(0.16,1,0.3,1);
+}
+.qr-bar.ch-bar{background:linear-gradient(90deg,var(--ch),var(--ch-t));}
+.qr-bar.rs-bar{background:var(--bg5);}
+
+/* speedup badge */
+.qr-badge-row{
+  display:flex;justify-content:flex-end;padding:0 16px 14px;
+}
+.qr-speedup{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  background:var(--ch-d);border:1px solid rgba(255,204,0,0.22);
+  color:var(--ch-t);padding:4px 12px;border-radius:100px;
+  transition:opacity 0.3s;
+}
+
+/* hero TOC */
+.hero-toc{
+  margin-top:36px;padding-top:28px;border-top:1px solid var(--bdr);
+  display:flex;gap:20px;flex-wrap:wrap;align-items:center;
+}
+.toc-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--t3);text-transform:uppercase;}
+.toc-links{display:flex;gap:6px;flex-wrap:wrap;}
+.toc-link{
+  font-size:12px;color:var(--t2);text-decoration:none;
+  padding:4px 10px;border:1px solid var(--bdr);border-radius:100px;
+  transition:all 0.12s;
+}
+.toc-link:hover{border-color:var(--bmd);color:var(--t1);}
+
+/* ====== STAT ROW ====== */
+.stat-row{
+  display:flex;gap:0;border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-top:32px;
+}
+.stat-item{flex:1;padding:20px 16px;border-right:1px solid var(--bdr);}
+.stat-item:last-child{border-right:none;}
+.stat-n{
+  font-family:'Sora',sans-serif;font-size:clamp(20px,2.6vw,32px);font-weight:700;
+  color:var(--t1);line-height:1;margin-bottom:6px;letter-spacing:-0.02em;
+}
+.stat-n s{color:var(--ch);text-decoration:none;}
+.stat-l{font-size:12px;color:var(--t2);line-height:1.55;}
+@media(max-width:640px){.stat-row{flex-wrap:wrap;}.stat-item{flex-basis:50%;border-bottom:1px solid var(--bdr);}}
+
+/* ====== CARDS ====== */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:820px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:24px;
+}
+.card-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:12px;display:block;
+}
+.card-h{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:10px;line-height:1.35;}
+.card-p{font-size:13.5px;color:var(--t2);line-height:1.72;}
+
+.insight{
+  background:var(--ch-d);border:1px solid rgba(255,204,0,0.16);
+  border-radius:10px;padding:18px 22px;margin-top:18px;
+}
+.insight p{font-size:14px;color:var(--t1);line-height:1.72;}
+.insight p strong{color:var(--ch-t);}
+
+.pill{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:0.05em;padding:3px 9px;border-radius:100px;
+  border:1px solid;margin-right:6px;margin-top:6px;
+}
+.p-ch{background:var(--ch-d);border-color:rgba(255,204,0,0.22);color:var(--ch-t);}
+.p-cy{background:var(--cy-d);border-color:rgba(0,196,204,0.22);color:var(--cy-t);}
+.p-gn{background:var(--grn-d);border-color:rgba(61,214,140,0.22);color:var(--grn-t);}
+.p-mu{background:rgba(255,255,255,0.03);border-color:var(--bdr);color:var(--t3);}
+
+/* ====== SPLIT PANELS ====== */
+.pos-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px;}
+@media(max-width:760px){.pos-split{grid-template-columns:1fr;}}
+.pos-panel{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:24px;
+}
+.pos-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.11em;text-transform:uppercase;margin-bottom:12px;display:block;}
+.pos-lbl.gap{color:var(--red);}
+.pos-lbl.opp{color:var(--grn-t);}
+.pos-panel h4{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:10px;line-height:1.3;}
+.pos-panel p{font-size:13.5px;color:var(--t2);line-height:1.72;}
+.pos-panel ul{list-style:none;margin-top:14px;}
+.pos-panel ul li{
+  font-size:13px;color:var(--t2);padding:8px 0;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:flex-start;gap:10px;line-height:1.55;
+}
+.pos-panel ul li:last-child{border-bottom:none;}
+.pos-panel ul li::before{
+  content:'';flex-shrink:0;width:5px;height:5px;border-radius:50%;
+  background:var(--ch);margin-top:6px;
+}
+.pos-panel ul li.warn::before{background:var(--red);}
+
+/* ====== MESSAGE TABLE ====== */
+.table-wrap{overflow-x:auto;margin-top:32px;}
+.msg-table{width:100%;border-collapse:collapse;}
+.msg-table th{
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  letter-spacing:0.11em;text-transform:uppercase;
+  color:var(--t3);font-weight:400;
+  padding:8px 16px;text-align:left;border-bottom:1px solid var(--bdr);
+}
+.msg-table td{padding:13px 16px;border-bottom:1px solid var(--bdr);vertical-align:top;font-size:13px;}
+.msg-table tr:last-child td{border-bottom:none;}
+.msg-table td:first-child{color:var(--t1);font-weight:600;width:18%;}
+.msg-table td:nth-child(2){color:var(--t2);width:30%;}
+.msg-table td:nth-child(3){color:var(--ch-t);}
+@media(max-width:680px){
+  .msg-table th:nth-child(2),.msg-table td:nth-child(2){display:none;}
+}
+
+/* ====== VCARD GRID ====== */
+.vcard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;}
+@media(max-width:820px){.vcard-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.vcard-grid{grid-template-columns:1fr;}}
+
+.vcard{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:22px;}
+.vc-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.10em;text-transform:uppercase;margin-bottom:8px;display:block;}
+.vc-lbl.v1{color:var(--ch-t);}
+.vc-lbl.v2{color:var(--cy-t);}
+.vc-lbl.v3{color:var(--grn-t);}
+.vc-h{font-size:14.5px;font-weight:600;color:var(--t1);margin-bottom:12px;line-height:1.3;}
+.vc-list{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.vc-list li{
+  font-size:12.5px;color:var(--t2);line-height:1.58;
+  padding:7px 10px;background:var(--bg3);border-radius:6px;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.vc-list li::before{content:'';flex-shrink:0;width:4px;height:4px;border-radius:50%;background:var(--t3);margin-top:7px;}
+
+/* ====== COMP TABLE ====== */
+.comp-wrap{overflow-x:auto;margin-top:28px;}
+.comp-table{width:100%;border-collapse:collapse;}
+.comp-table th{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--t3);font-weight:400;
+  padding:9px 14px;text-align:left;border-bottom:1px solid var(--bdr);
+}
+.comp-table td{padding:11px 14px;border-bottom:1px solid var(--bdr);font-size:12.5px;color:var(--t2);vertical-align:middle;}
+.comp-table tr:last-child td{border-bottom:none;}
+.comp-table td:first-child{color:var(--t1);font-weight:600;}
+.win{color:var(--grn-t);font-weight:500;}
+.lose{color:var(--red);}
+.ch-row{background:rgba(255,204,0,0.03);}
+.ch-row td:first-child{color:var(--ch);}
+
+/* ====== ACCORDION ====== */
+.accord{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-top:28px;}
+.acc-item{border-bottom:1px solid var(--bdr);}
+.acc-item:last-child{border-bottom:none;}
+.acc-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;cursor:pointer;transition:background 0.12s;gap:12px;
+}
+.acc-head:hover{background:var(--bg3);}
+.ah-left{display:flex;align-items:center;gap:10px;}
+.ah-tag{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.07em;text-transform:uppercase;color:var(--t3);flex-shrink:0;}
+.ah-title{font-size:13.5px;font-weight:500;color:var(--t1);}
+.ah-chev{font-size:12px;color:var(--t3);transition:transform 0.22s;flex-shrink:0;}
+.acc-item.open .ah-chev{transform:rotate(180deg);}
+.acc-body{display:none;padding:4px 20px 20px;font-size:13.5px;color:var(--t2);line-height:1.72;}
+.acc-item.open .acc-body{display:block;}
+.acc-body strong{color:var(--t1);font-weight:500;}
+.acc-body p{margin-bottom:12px;}
+.acc-body p:last-child{margin-bottom:0;}
+
+.obj-pair{
+  background:var(--bg3);border-radius:8px;
+  padding:13px 15px;margin-bottom:10px;
+  border-left:2px solid var(--ch);
+}
+.obj-q{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:6px;}
+.obj-a{font-size:13px;color:var(--t2);line-height:1.66;}
+.obj-a strong{color:var(--ch-t);}
+
+/* ====== 90-DAY PLAN ====== */
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;}
+@media(max-width:760px){.plan-grid{grid-template-columns:1fr;}}
+.pcard{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:22px;}
+.pcard-phase{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;}
+.pcard-phase.p1{color:var(--ch-t);}
+.pcard-phase.p2{color:var(--cy-t);}
+.pcard-phase.p3{color:var(--grn-t);}
+.pcard-h{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:14px;line-height:1.3;}
+.pcard-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.pcard-list li{
+  font-size:12.5px;color:var(--t2);line-height:1.6;
+  padding:8px 10px;background:var(--bg3);border-radius:6px;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.pcard-list li::before{content:'';flex-shrink:0;width:4px;height:4px;border-radius:50%;background:var(--t3);margin-top:7px;}
+
+/* ====== WORK GRID ====== */
+.work-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:28px;}
+@media(max-width:940px){.work-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:580px){.work-grid{grid-template-columns:1fr 1fr;}}
+
+.wcard{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:18px;
+  text-decoration:none;display:flex;flex-direction:column;
+  transition:border-color 0.13s,transform 0.13s;
+}
+.wcard:hover{border-color:var(--bmd);transform:translateY(-2px);}
+.wcard-tag{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.07em;text-transform:uppercase;color:var(--t3);margin-bottom:10px;display:block;}
+.wcard h4{font-size:13.5px;font-weight:600;color:var(--t1);margin-bottom:7px;line-height:1.35;}
+.wcard p{font-size:12px;color:var(--t2);line-height:1.6;flex:1;}
+.wcard-arr{margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ch);}
+
+/* ====== FOOTER ====== */
+.sig{display:flex;justify-content:space-between;align-items:flex-start;padding:56px 0;flex-wrap:wrap;gap:20px;}
+.sig-name{
+  font-family:'Sora',sans-serif;
+  font-size:clamp(26px,4vw,48px);font-weight:800;
+  color:var(--t1);line-height:1;margin-bottom:12px;letter-spacing:-0.02em;
+}
+.sig-name span{color:var(--ch);}
+.sig-meta{font-size:14px;color:var(--t2);line-height:2;}
+.sig-meta a{color:var(--t2);text-decoration:none;transition:color 0.12s;}
+.sig-meta a:hover{color:var(--t1);}
+.sig-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.sbtn{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:10px 22px;border-radius:7px;text-decoration:none;transition:all 0.13s;}
+.sbtn.pri{background:var(--ch);color:#05070a;}
+.sbtn.pri:hover{opacity:0.87;}
+.sbtn.ghost{background:transparent;border:1px solid var(--bmd);color:var(--t2);}
+.sbtn.ghost:hover{border-color:var(--blg);color:var(--t1);}
+
+/* ====== REVEAL ====== */
+.rv{opacity:0;transform:translateY(18px);transition:opacity 0.46s,transform 0.46s;}
+.rv.in{opacity:1;transform:none;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(255,204,0,0.22);border-radius:2px;}
+
+/* shared lists */
+.blist{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.blist li{font-size:13.5px;color:var(--t2);line-height:1.65;display:flex;gap:10px;align-items:flex-start;}
+.blist li::before{content:'';flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--ch);margin-top:7px;}
+
+.callout{
+  background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--ch);
+  border-radius:0 8px 8px 0;padding:15px 18px;margin-top:14px;
+}
+.callout p{font-size:13.5px;color:var(--t2);line-height:1.7;}
+.callout p strong{color:var(--t1);}
+
+.hr{border:none;border-top:1px solid var(--bdr);margin:28px 0;}
+</style>
+</head>
+<body>
+
+<div id="rbar"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-i">
+    <div class="nav-brand">
+      <div class="nav-spark"><span></span><span></span><span></span><span></span></div>
+      <b>CH</b>&nbsp;/&nbsp;bhanu
+    </div>
+    <div class="nav-links">
+      <a href="#landscape"  class="nl">Landscape</a>
+      <a href="#messaging"  class="nl">Messaging</a>
+      <a href="#verticals"  class="nl">Vertical GTM</a>
+      <a href="#competitive" class="nl">Competitive</a>
+      <a href="#enablement" class="nl">Enablement</a>
+      <a href="#plan"       class="nl">90-Day Plan</a>
+      <a href="#work"       class="nl">Other Work</a>
+      <a href="https://drive.google.com/file/d/15oePEdWBNaf5p7qPyLTCxuhJiOI9Y3XX/view" target="_blank" class="nl cta">Resume</a>
+    </div>
+    <button class="hbg" id="hbg" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mob-menu">
+  <a href="#landscape"  onclick="cMob()">Landscape</a>
+  <a href="#messaging"  onclick="cMob()">Messaging</a>
+  <a href="#verticals"  onclick="cMob()">Vertical GTM</a>
+  <a href="#competitive" onclick="cMob()">Competitive</a>
+  <a href="#enablement" onclick="cMob()">Enablement</a>
+  <a href="#plan"       onclick="cMob()">90-Day Plan</a>
+  <a href="#work"       onclick="cMob()">Other Work</a>
+  <a href="https://drive.google.com/file/d/15oePEdWBNaf5p7qPyLTCxuhJiOI9Y3XX/view" target="_blank" class="mct" onclick="cMob()">Resume</a>
+</div>
+
+<!-- =========================================================
+     HERO
+     ========================================================= -->
+<div class="hero">
+  <div class="hero-top">
+
+    <!-- Left: text -->
+    <div>
+      <div class="hero-eyebrow">
+        <span class="ey-dot"></span>
+        Industry Marketing · Financial Services
+      </div>
+      <h1 class="hero-h">
+        Build the<br>vertical <em>motion</em><br>from scratch.
+      </h1>
+      <p class="hero-sub">
+        ClickHouse has the customer proof in financial services. Capital One, Deutsche Bank, Airwallex, RBC. This page explores what the industry GTM layer needs to do next.
+      </p>
+      <div class="hero-btns">
+        <a href="#landscape" class="hbtn pri">See the work ↓</a>
+        <a href="https://www.linkedin.com/in/bhanuexcalibur/" target="_blank" class="hbtn ghost">LinkedIn</a>
+      </div>
+    </div>
+
+    <!-- Right: product-native interactive widget -->
+    <div class="qr-widget">
+
+      <!-- Chrome bar -->
+      <div class="qr-chrome">
+        <div class="qr-chrome-dot d1"></div>
+        <div class="qr-chrome-dot d2"></div>
+        <div class="qr-chrome-dot d3"></div>
+        <span class="qr-chrome-title">query_benchmark.sql — financial_transactions</span>
+      </div>
+
+      <!-- SQL display -->
+      <div class="qr-sql">
+        <span class="kw">SELECT</span> account_id, <span class="fn">sum</span>(amount), <span class="fn">count</span>()<br>
+        <span class="kw">FROM</span> <span class="tbl">transactions</span><br>
+        <span class="kw">WHERE</span> ts &gt;= <span class="fn">now</span>() - <span class="fn">INTERVAL</span> <span class="num">30</span> <span class="kw">DAY</span><br>
+        <span class="kw">GROUP BY</span> account_id <span class="kw">LIMIT</span> <span class="num">1000</span>
+        <span style="display:block;margin-top:4px;color:var(--t3);font-size:10px;">-- scanning <span class="qr-row-count" id="rowCountDisplay">1.0B</span> rows</span>
+      </div>
+
+      <!-- Slider -->
+      <div class="qr-slider-wrap">
+        <div class="qr-slider-label">
+          <span>Rows to scan</span>
+          <span class="qr-val" id="sliderVal">1.0B rows</span>
+        </div>
+        <input type="range" class="qr-range" id="qrSlider" min="0" max="100" value="50">
+      </div>
+
+      <!-- Race lanes -->
+      <div class="qr-lanes">
+        <div class="qr-lane">
+          <div class="qr-lane-header">
+            <span class="qr-lane-name ch-name"><span class="dot dot-ch"></span>ClickHouse</span>
+            <span class="qr-ms fast" id="chMs">— ms</span>
+          </div>
+          <div class="qr-track">
+            <div class="qr-bar ch-bar" id="chBar" style="will-change:transform;"></div>
+          </div>
+        </div>
+        <div class="qr-lane">
+          <div class="qr-lane-header">
+            <span class="qr-lane-name rs-name"><span class="dot dot-rs"></span>Row-store DB</span>
+            <span class="qr-ms slow" id="rsMs">— ms</span>
+          </div>
+          <div class="qr-track">
+            <div class="qr-bar rs-bar" id="rsBar" style="background:var(--t3);will-change:transform;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Speedup badge -->
+      <div class="qr-badge-row">
+        <span class="qr-speedup" id="speedupBadge">Move the slider ↑</span>
+      </div>
+
+    </div><!-- end .qr-widget -->
+  </div><!-- end .hero-top -->
+
+  <!-- TOC row -->
+  <div class="hero-toc">
+    <span class="toc-label">Sections</span>
+    <div class="toc-links">
+      <a href="#landscape" class="toc-link">Market landscape</a>
+      <a href="#messaging" class="toc-link">Messaging architecture</a>
+      <a href="#verticals" class="toc-link">Vertical GTM plays</a>
+      <a href="#competitive" class="toc-link">Competitive</a>
+      <a href="#enablement" class="toc-link">Field enablement</a>
+      <a href="#plan" class="toc-link">90-day plan</a>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     LANDSCAPE
+     ========================================================= -->
+<section id="landscape">
+  <div class="wrap">
+    <span class="sec-eye">01 · The Opportunity</span>
+    <h2 class="sec-h">Financial services is ClickHouse's densest proof point and its least developed GTM surface</h2>
+    <p class="sec-sub">Capital One, Deutsche Bank, RBC, Airwallex, Juspay, Merkle Science. The customer logos exist. The vertical narrative, targeted content, field motion, and event presence — that's the build.</p>
+
+    <div class="stat-row rv">
+      <div class="stat-item">
+        <div class="stat-n"><s>$</s>400M</div>
+        <div class="stat-l">Series D, January 2026. ARR up 250% year-over-year. The infrastructure bet is paying off.</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n">3,000<s>+</s></div>
+        <div class="stat-l">Customers globally. FS logos span banks, fintechs, crypto, payments, and risk platforms.</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n"><s>~</s>11M</div>
+        <div class="stat-l">Rows ingested per second, publicly cited. That's the number that lands in a risk or trading room.</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n">AWS<s> FS</s></div>
+        <div class="stat-l">Financial Services Competency achieved March 2026. The credentialing exists. GTM needs to amplify it.</div>
+      </div>
+    </div>
+
+    <div class="pos-split rv">
+      <div class="pos-panel">
+        <span class="pos-lbl gap">Current gaps</span>
+        <h4>Strong proof, thin positioning layer</h4>
+        <p>ClickHouse has real financial services deployments. But the GTM motion still talks to engineers, not to the VP of Risk, the Head of Transaction Monitoring, or the CDO running a regulatory reporting stack.</p>
+        <ul>
+          <li class="warn">Customer stories exist but speak to developers, not economic buyers</li>
+          <li class="warn">No published FS-specific solution brief, use-case page, or vertical pitch deck</li>
+          <li class="warn">Snowflake has a dedicated FS page, a partnership ecosystem, and co-sell relationships with major banks</li>
+          <li class="warn">Money20/20 Europe presence not yet established as a consistent anchor for the FS community</li>
+        </ul>
+      </div>
+      <div class="pos-panel">
+        <span class="pos-lbl opp">The build opportunity</span>
+        <h4>A vertical motion that earns enterprise trust</h4>
+        <p>Financial services buyers don't trust speed claims in a whitepaper. They trust benchmarks, reference customers in their sub-vertical, regulatory coverage language, and a vendor who shows up where they buy. That's what "from scratch" actually means here.</p>
+        <ul>
+          <li>Segment FS into discrete buying groups: trading, payments, fraud/risk, compliance/regtech</li>
+          <li>Translate technical performance into business outcomes each segment cares about</li>
+          <li>Create credibility assets that shorten enterprise sales cycles</li>
+          <li>Build event and community presence anchored in Amsterdam and London</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="insight rv">
+      <p><strong>The core positioning bet:</strong> financial services companies don't need a faster database. They need a data infrastructure vendor that speaks fluent risk, compliance, and latency in the same sentence. ClickHouse can do that. The PMM job is to make that argument before the engineering team gets pulled into an RFP evaluation.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     MESSAGING
+     ========================================================= -->
+<section id="messaging">
+  <div class="wrap">
+    <span class="sec-eye">02 · Messaging Architecture</span>
+    <h2 class="sec-h">The same platform needs to land differently depending on who's in the room</h2>
+    <p class="sec-sub">ClickHouse's buyers in financial services span a wide authority stack. A quant engineer, a Head of Fraud, and a CDO evaluating infrastructure consolidation all have different trigger points. The message architecture below maps to each.</p>
+
+    <div class="table-wrap rv">
+      <table class="msg-table">
+        <thead>
+          <tr>
+            <th>Audience</th>
+            <th>Actual concern</th>
+            <th>Message that lands</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Quant / Trading Engineer</td>
+            <td>Tick data at microsecond precision, ASOF joins, sub-second aggregations across billions of rows</td>
+            <td>"ClickHouse was designed for time-series data at trading scale. ASOF joins, MergeTree indexing, columnar compression — no retrofitting required."</td>
+          </tr>
+          <tr>
+            <td>Head of Fraud / Risk Ops</td>
+            <td>Detection latency, false positive rate, model retraining speed</td>
+            <td>"Your fraud models are only as good as the data feeding them. ClickHouse ingests millions of events per second and makes them queryable without sampling."</td>
+          </tr>
+          <tr>
+            <td>CDO / Data Platform Lead</td>
+            <td>Vendor consolidation, cost predictability, engineering overhead</td>
+            <td>"One engine for observability, analytics, AI workloads, and event data. Mintlify cut cloud costs 60% and got 18x faster queries. That pattern holds in FS."</td>
+          </tr>
+          <tr>
+            <td>Compliance / RegTech Buyer</td>
+            <td>Audit trails, data residency, query reproducibility</td>
+            <td>"Full-fidelity historical data, not sampled snapshots. Every regulatory query runs on complete records, not approximations."</td>
+          </tr>
+          <tr>
+            <td>VP Engineering / CTO</td>
+            <td>Developer experience, future-proofing, AI workload readiness</td>
+            <td>"SQL with 100+ analytical functions. No proprietary query language. When your AI agents start generating queries 10x faster, the database doesn't blink."</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight rv">
+      <p><strong>Across all segments, the underlying message is consistent:</strong> most data infrastructure was built for a world where humans ran queries. AI agents and real-time detection systems changed the requirement. <strong>ClickHouse was built for the new requirement, not retrofitted for it.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     VERTICALS
+     ========================================================= -->
+<section id="verticals">
+  <div class="wrap">
+    <span class="sec-eye">03 · Vertical GTM Plays</span>
+    <h2 class="sec-h">Four sub-verticals. Four distinct entry points. One platform.</h2>
+    <p class="sec-sub">Industry marketing built around a single generic "financial services" bucket doesn't convert. The buyers, triggers, and proof points are different enough across sub-verticals that content, field motion, and partner strategy need to be segmented from the start.</p>
+
+    <div class="vcard-grid rv">
+      <div class="vcard">
+        <span class="vc-lbl v1">Sub-vertical 1</span>
+        <h4 class="vc-h">Trading and Market Analytics</h4>
+        <ul class="vc-list">
+          <li>Tick-level storage for billions of trades at microsecond precision using MergeTree engine</li>
+          <li>ASOF joins for time-weighted calculations no other OLAP database handles natively</li>
+          <li>Pre-compute OHLCV bars across multiple timeframes with materialized views</li>
+          <li>Reference: Longbridge (real-time market data for traders and quant teams, verified)</li>
+        </ul>
+        <div style="margin-top:12px;">
+          <span class="pill p-ch">Quant teams</span>
+          <span class="pill p-mu">ASOF joins</span>
+          <span class="pill p-mu">Time-series</span>
+        </div>
+      </div>
+      <div class="vcard">
+        <span class="vc-lbl v2">Sub-vertical 2</span>
+        <h4 class="vc-h">Payments and Transaction Analytics</h4>
+        <ul class="vc-list">
+          <li>Analyze billions of transactions with high concurrency, no sampling required</li>
+          <li>Real-time operational dashboards with sub-second latency across full data history</li>
+          <li>References: Juspay and ProcessOut — fraud detection and operational efficiency at scale (verified)</li>
+          <li>Entry point: payment processing cost analytics, authorization rate optimization</li>
+        </ul>
+        <div style="margin-top:12px;">
+          <span class="pill p-cy">Payments ops</span>
+          <span class="pill p-mu">High concurrency</span>
+        </div>
+      </div>
+      <div class="vcard">
+        <span class="vc-lbl v3">Sub-vertical 3</span>
+        <h4 class="vc-h">Fraud Detection and Risk Monitoring</h4>
+        <ul class="vc-list">
+          <li>Correlate device fingerprints, login events, IP data, and transaction history in real time</li>
+          <li>Full-fidelity event stream processing — no approximations for compliance</li>
+          <li>References: Seon (fraud prevention, AML), Merkle Science (crypto anomaly detection), QuickCheck (credit scoring)</li>
+          <li>Differentiation vs. Splunk: cost per GB of ingest, at scale</li>
+        </ul>
+        <div style="margin-top:12px;">
+          <span class="pill p-gn">Risk / AML</span>
+          <span class="pill p-mu">Anomaly detection</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;" class="rv">
+      <div class="vcard" style="border-color:rgba(255,204,0,0.14);">
+        <span class="vc-lbl v1">Sub-vertical 4 · Enterprise Priority</span>
+        <h4 class="vc-h">Regulatory Reporting and Compliance Analytics</h4>
+        <p class="card-p">This is where the enterprise sales cycle is longest and the ACV is highest. Deutsche Bank and RBC are the anchor references. Deutsche Bank for enterprise-scale financial analytics, RBC for AI and ML workloads (both verified via AWS FS Competency blog). The GTM play here is different: it's not developer-led. It's a field sales motion anchored by solution briefs that speak the language of BCBS 239, FRTB, and DORA, not columnar storage and MergeTree tables.</p>
+        <ul class="blist" style="margin-top:14px;">
+          <li>Full-fidelity historical queries, never approximated. Regulatory reproducibility demands it.</li>
+          <li>BYOC (Bring Your Own Cloud) deployment for data residency requirements in EU and APAC</li>
+          <li>Partner motion: SI relationships (Accenture, Deloitte FS practices) to open enterprise doors ClickHouse field teams can't reach directly</li>
+        </ul>
+        <div style="margin-top:14px;">
+          <span class="pill p-ch">Deutsche Bank</span>
+          <span class="pill p-ch">RBC</span>
+          <span class="pill p-mu">BYOC</span>
+          <span class="pill p-mu">BCBS 239</span>
+          <span class="pill p-mu">DORA</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 rv" style="margin-top:28px;">
+      <div class="card">
+        <span class="card-tag">Where ClickHouse currently enters</span>
+        <h4 class="card-h">Engineering-led, bottoms-up</h4>
+        <p class="card-p">A quant engineer or data engineer finds ClickHouse, benchmarks it against what they're running, and builds an internal proof of concept. If it works, they advocate up. This is how most deals start, and it's healthy.</p>
+        <ul class="blist">
+          <li>Developer documentation is the sales deck</li>
+          <li>Community Slack and GitHub are discovery channels</li>
+          <li>Deal risk: no economic buyer visibility until late in the cycle</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="card-tag">Where industry marketing creates leverage</span>
+        <h4 class="card-h">Executive-visible, credibility-first</h4>
+        <p class="card-p">When a CDO or VP of Risk already knows the ClickHouse name from a conference talk, a peer reference, or a solution brief that speaks their language, the engineering POC moves faster and the expansion conversation starts earlier.</p>
+        <ul class="blist">
+          <li>Solution briefs by sub-vertical, not by feature set</li>
+          <li>Event presence at Money20/20 and Sibos, where FS buyers go</li>
+          <li>Reference programs that let Deutsche Bank and RBC speak publicly</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     COMPETITIVE
+     ========================================================= -->
+<section id="competitive">
+  <div class="wrap">
+    <span class="sec-eye">04 · Competitive Landscape</span>
+    <h2 class="sec-h">How ClickHouse fits into conversations FS buyers are already having</h2>
+    <p class="sec-sub">FS data platform decisions rarely involve a single vendor comparison. Buyers are evaluating ClickHouse against their existing stack. The win condition is understanding what they're unhappy with and speaking to that first.</p>
+
+    <div class="comp-wrap rv">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Vendor / Stack</th>
+            <th>What FS teams use it for</th>
+            <th>Where ClickHouse wins</th>
+            <th>Where ClickHouse is challenged</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ch-row">
+            <td>ClickHouse</td>
+            <td>Real-time analytics, fraud detection, trading analytics, observability</td>
+            <td class="win">Sub-second on billions of rows. Cost/GB. No sampling. SQL-native. AI workload ready.</td>
+            <td>Smaller ecosystem than Snowflake. Less "enterprise managed" feel for non-technical buyers.</td>
+          </tr>
+          <tr>
+            <td>Snowflake</td>
+            <td>Enterprise data warehousing, BI reporting, cross-cloud governance</td>
+            <td class="win">ClickHouse runs TPC-H SF100 at a fraction of the cost. Full workload at SF10 for under $0.01 (verified benchmark).</td>
+            <td class="lose">Snowflake has deeper enterprise integrations and a larger certified partner ecosystem for FS.</td>
+          </tr>
+          <tr>
+            <td>Databricks</td>
+            <td>ML/AI workloads, Spark pipelines, unified lakehouse</td>
+            <td class="win">Faster and cheaper on join-heavy analytical queries from 721M to 7.2B rows (verified benchmark). No Spark overhead.</td>
+            <td>Databricks has deeper ML tooling and Unity Catalog for governance, relevant to model-heavy FS teams.</td>
+          </tr>
+          <tr>
+            <td>kdb+ (KX)</td>
+            <td>High-frequency trading, tick databases, quant finance</td>
+            <td class="win">SQL familiarity over q/kdb proprietary language. Lower licensing cost. Easier to hire for.</td>
+            <td class="lose">kdb+ has 30+ years on trading floors. Switching cost is high. The win here is greenfield, not replacement.</td>
+          </tr>
+          <tr>
+            <td>Elastic / Splunk</td>
+            <td>Log observability, SIEM, security analytics</td>
+            <td class="win">ClickHouse compresses data to 1/12 to 1/20 of uncompressed size vs. Snowflake's ~4x (verified). At log scale, that's a material cost difference.</td>
+            <td>Elastic and Splunk have pre-built FS compliance dashboards and SIEM integrations ClickHouse doesn't replicate out of the box.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid-2 rv" style="margin-top:28px;">
+      <div class="card">
+        <span class="card-tag">Displacement narrative</span>
+        <h4 class="card-h">When the conversation is "we already have Snowflake"</h4>
+        <p class="card-p">The right counter isn't "Snowflake is bad." It's: Snowflake was built for BI analysts running batch workloads. If your fraud team is running queries on billions of events and waiting, that's not a Snowflake configuration problem. That's an architecture problem. ClickHouse solves it without replacing the warehouse — it handles the workloads that saturate it.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Land and expand model</span>
+        <h4 class="card-h">Where the wedge typically enters</h4>
+        <p class="card-p">In most FS deals, ClickHouse enters through a specific high-value workload: a fraud detection pipeline that can't run in the existing stack, a real-time trading dashboard that's throttling, or an observability layer drowning in Splunk costs. The expansion story — once a team is on ClickHouse for one workload — is consolidating adjacent ones onto the same infrastructure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     ENABLEMENT
+     ========================================================= -->
+<section id="enablement">
+  <div class="wrap">
+    <span class="sec-eye">05 · Field Enablement</span>
+    <h2 class="sec-h">What the sales team needs to run a vertical play they didn't build</h2>
+    <p class="sec-sub">An industry marketing motion only creates value if field teams can actually run it. The content, talk tracks, and objection handling below are the PMM-to-field handoff.</p>
+
+    <div class="accord rv">
+      <div class="acc-item open">
+        <div class="acc-head" onclick="tAcc(this)">
+          <div class="ah-left">
+            <span class="ah-tag">talk track</span>
+            <span class="ah-title">Opening the conversation with a CDO or data platform lead</span>
+          </div>
+          <span class="ah-chev">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>Most data infrastructure pitches open with performance benchmarks. CDOs have seen a hundred of those. The conversation that lands opens differently: <strong>"Your engineering team is probably already running some workloads on ClickHouse or evaluating it. I wanted to connect because the companies getting the most out of it in FS have found the real value isn't replacing what they have, it's handling what their existing stack can't."</strong></p>
+          <p>From there, the questions that unlock the deal: What workloads feel slow or expensive? Where are engineers complaining about query latency? Are there analytical use cases deprioritized because the infrastructure makes them too hard?</p>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-head" onclick="tAcc(this)">
+          <div class="ah-left">
+            <span class="ah-tag">objection handling</span>
+            <span class="ah-title">"We're committed to Snowflake / Databricks for the next three years"</span>
+          </div>
+          <span class="ah-chev">▾</span>
+        </div>
+        <div class="acc-body">
+          <div class="obj-pair">
+            <div class="obj-q">"Our data team is standardized on Snowflake. We're not replacing it."</div>
+            <div class="obj-a">Good news: this isn't a replacement conversation. <strong>ClickHouse isn't a warehouse consolidation play — it's a real-time workload layer</strong> that sits alongside your existing stack. Deutsche Bank runs ClickHouse at enterprise scale without replacing their core warehouse. The workloads that are slow or expensive in Snowflake are exactly what ClickHouse is designed for.</div>
+          </div>
+          <div class="obj-pair">
+            <div class="obj-q">"We need SOC 2, and data residency in EU."</div>
+            <div class="obj-a">ClickHouse Cloud is SOC 2 Type II certified. <strong>BYOC (Bring Your Own Cloud) supports data residency requirements</strong> in EU and APAC for regulated workloads. The AWS Financial Services Competency achieved March 2026 reflects the same controls financial services teams audit for.</div>
+          </div>
+          <div class="obj-pair">
+            <div class="obj-q">"Your open source origins make procurement nervous."</div>
+            <div class="obj-a"><strong>Deutsche Bank and RBC are production customers.</strong> Capital One and Airwallex expanded their deployments last quarter. The open source core means no vendor lock-in and a 2,900+ contributor ecosystem. We go through the same enterprise procurement process as any other infrastructure vendor.</div>
+          </div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-head" onclick="tAcc(this)">
+          <div class="ah-left">
+            <span class="ah-tag">content assets</span>
+            <span class="ah-title">The FS enablement kit — what to build in 90 days</span>
+          </div>
+          <span class="ah-chev">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>Field teams don't have time to synthesize technical docs into a discovery call. The assets they need:</p>
+          <ul class="blist">
+            <li><strong>One-pager by sub-vertical:</strong> trading analytics, fraud/risk, payments, regulatory reporting. Each leads with a customer result, not a feature list.</li>
+            <li><strong>ROI calculator:</strong> inputs are current ingest volume, query frequency, and existing tool cost. Output is a cost comparison versus ClickHouse Cloud equivalent. This shortens the "we need to build a business case" step.</li>
+            <li><strong>Discovery question bank:</strong> 10 to 15 questions segmented by buyer type that help reps identify the workloads where ClickHouse has the strongest advantage.</li>
+            <li><strong>Battle cards:</strong> one per major competitor (Snowflake, Databricks, kdb+). Not a feature matrix — an objection-response card a rep can use in real time.</li>
+            <li><strong>Reference intro scripts:</strong> approved templates for connecting a prospect to a customer peer in the same FS sub-vertical. Nothing closes a deal faster in enterprise than a peer reference.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-head" onclick="tAcc(this)">
+          <div class="ah-left">
+            <span class="ah-tag">event strategy</span>
+            <span class="ah-title">Where FS buyers go, and what ClickHouse's presence should look like</span>
+          </div>
+          <span class="ah-chev">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>The Amsterdam location of this role isn't incidental. Money20/20 Europe runs in Amsterdam every June — it's the largest fintech event in Europe with 6,500+ executives and the right buyer density for this motion. Sibos (SWIFT's annual conference) brings the global banking and transaction infrastructure community together each autumn.</p>
+          <p><strong>The event goal isn't booth traffic. It's pipeline generation through three mechanics:</strong></p>
+          <ul class="blist">
+            <li>A breakout session anchored by an FS customer speaking about their ClickHouse deployment — not a ClickHouse employee selling</li>
+            <li>Pre-event outreach using the vertical messaging framework to book meetings with target accounts before the show floor opens</li>
+            <li>A post-event content asset: a 1,500-word piece summarizing what data leaders were actually worried about, validated by in-person conversations</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 rv" style="margin-top:28px;gap:16px;">
+      <div class="card">
+        <span class="card-tag">GTM iteration cadence</span>
+        <h4 class="card-h">How to run the learning loop</h4>
+        <ul class="blist">
+          <li><strong>Monthly win/loss debrief:</strong> structured conversation with field reps after every FS deal won or lost. The question isn't "what happened" — it's "what content or talk track would have changed the outcome."</li>
+          <li><strong>Content signal tracking:</strong> which vertical one-pagers are being shared most by reps, which aren't being used. Non-usage is signal that the asset doesn't fit the conversation.</li>
+          <li><strong>Quarterly hypothesis review:</strong> each sub-vertical GTM has one testable hypothesis. Track conversion rates by channel to validate or revise.</li>
+          <li><strong>Customer expansion patterns:</strong> the expansion data tells you which workloads are winning the second land. Build the content that makes that pattern repeatable.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="card-tag">Metrics that matter</span>
+        <h4 class="card-h">How to measure a vertical motion that's just starting</h4>
+        <ul class="blist">
+          <li>Pipeline sourced through vertical-specific content, tracked by UTM and deal tag</li>
+          <li>Sales cycle length for FS deals vs. non-FS: does vertical enablement compress time-to-decision?</li>
+          <li>Field adoption rate: what percentage of FS deals use the solution brief or battle card at least once?</li>
+          <li>NPS among FS accounts at 90 days and 12 months: expansion rate as the leading indicator of message fit</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     90-DAY PLAN
+     ========================================================= -->
+<section id="plan">
+  <div class="wrap">
+    <span class="sec-eye">06 · 90-Day Plan</span>
+    <h2 class="sec-h">What building this from scratch actually looks like</h2>
+    <p class="sec-sub">The JD says "build from scratch." That's a different mandate than optimizing an existing motion. The first 90 days are about listening, mapping, and building the right foundation — not shipping content before knowing what the field actually needs.</p>
+
+    <div class="plan-grid rv">
+      <div class="pcard">
+        <span class="pcard-phase p1">Days 1 to 30 · Listen</span>
+        <h4 class="pcard-h">Map the current state before building anything</h4>
+        <ul class="pcard-list">
+          <li>Audit all existing FS customer stories, case studies, and references. Identify gaps by sub-vertical.</li>
+          <li>Ride along on 8 to 10 FS sales calls. Take notes on the objections that appear most often.</li>
+          <li>Interview 4 to 5 existing FS customers: what made them choose ClickHouse, what almost stopped them, what they wish they had in the evaluation.</li>
+          <li>Map the competitive landscape by sub-vertical: what are prospects displacing, and where does ClickHouse lose deals?</li>
+          <li>Identify the 3 highest-ARR FS logos and understand their expansion trajectory.</li>
+        </ul>
+      </div>
+      <div class="pcard">
+        <span class="pcard-phase p2">Days 31 to 60 · Build</span>
+        <h4 class="pcard-h">First assets, first frameworks</h4>
+        <ul class="pcard-list">
+          <li>Ship the first FS solution brief: one sub-vertical, validated with two field reps before publishing.</li>
+          <li>Draft the competitive battle cards (Snowflake, Databricks, kdb+). Run one battle card training with the EMEA field team.</li>
+          <li>Draft vertical messaging framework for all four FS segments. Share with product and field for validation.</li>
+          <li>Define the FS ICP more precisely: firmographic criteria, technographic signals, behavioral triggers.</li>
+          <li>Identify the right Money20/20 Europe strategy for the following year. Begin internal alignment.</li>
+        </ul>
+      </div>
+      <div class="pcard">
+        <span class="pcard-phase p3">Days 61 to 90 · Iterate</span>
+        <h4 class="pcard-h">Measure, revise, and set the flywheel</h4>
+        <ul class="pcard-list">
+          <li>First pipeline review: how are deals sourced through vertical content performing vs. baseline? Instrument the tracking.</li>
+          <li>Ship the FS ROI calculator. Pilot with 3 AEs. Gather feedback on whether it shortens the business case step.</li>
+          <li>Publish the first vertical-specific blog post or thought leadership piece, co-authored with a customer or field perspective.</li>
+          <li>Present the 90-day learnings to leadership with a proposed H2 roadmap: which sub-verticals to double down on, which partnerships to pursue, where the content gaps remain.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout rv">
+      <p><strong>Why this sequence matters:</strong> an industry marketing motion built without listening to the field first produces assets that look right but don't get used. The first 30 days create the foundation that makes everything in days 31 to 90 defensible and relevant, not just plausible.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     OTHER WORK
+     ========================================================= -->
+<section id="work">
+  <div class="wrap">
+    <span class="sec-eye">07 · Other Relevant Work</span>
+    <h2 class="sec-h">Selected projects</h2>
+    <p class="sec-sub">Ranked by how directly the context maps to financial services, enterprise data buyers, and developer-led GTM.</p>
+
+    <div class="work-grid rv">
+      <a class="wcard" href="https://bhanuexcalibur.github.io/RevolutBusiness/" target="_blank">
+        <span class="wcard-tag">Fintech · B2B · Enterprise GTM</span>
+        <h4>Revolut Business</h4>
+        <p>Product marketing for a fintech scaling from SMB to enterprise. Multi-stakeholder buying, financial services positioning, and a credibility gap to close.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+      <a class="wcard" href="https://bhanuexcalibur.github.io/CashFree/" target="_blank">
+        <span class="wcard-tag">Payments · API-first · Developer GTM</span>
+        <h4>Cashfree</h4>
+        <p>PMM for a payments infrastructure company with a developer-first distribution model. Technical audience, fintech-adjacent positioning, high-volume transaction context.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+      <a class="wcard" href="https://bhanuexcalibur.github.io/Stripe/" target="_blank">
+        <span class="wcard-tag">Developer-First · Enterprise SaaS</span>
+        <h4>Stripe</h4>
+        <p>Positioning for a payments platform navigating the developer champion vs. finance economic buyer dynamic — directly analogous to ClickHouse's dual-audience challenge in FS.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+      <a class="wcard" href="https://bhanuexcalibur.github.io/Canonical/" target="_blank">
+        <span class="wcard-tag">Infrastructure · Open Source GTM</span>
+        <h4>Canonical</h4>
+        <p>GTM for an open-source infrastructure vendor building enterprise credibility. Direct parallel: translating developer adoption into enterprise trust and commercial traction.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+      <a class="wcard" href="https://bhanuexcalibur.github.io/Continuous/" target="_blank">
+        <span class="wcard-tag">B2B SaaS · Positioning</span>
+        <h4>Continuous</h4>
+        <p>Core PMM: market positioning, ICP definition, competitive narrative, and content strategy for a B2B SaaS product in a crowded category.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<section>
+  <div class="wrap">
+    <div class="sig">
+      <div>
+        <div class="sig-name">Bhanu <span>Excalibur</span></div>
+        <div class="sig-meta">
+          Product Marketing · GTM · B2B SaaS<br>
+          <a href="https://www.linkedin.com/in/bhanuexcalibur/" target="_blank">LinkedIn</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:bhanukumar0902@gmail.com">bhanukumar0902@gmail.com</a>
+        </div>
+        <div class="sig-btns">
+          <a href="https://drive.google.com/file/d/15oePEdWBNaf5p7qPyLTCxuhJiOI9Y3XX/view" target="_blank" class="sbtn pri">View Resume</a>
+          <a href="https://www.linkedin.com/in/bhanuexcalibur/" target="_blank" class="sbtn ghost">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ============================================================
+   READING BAR
+   ============================================================ */
+const rbar = document.getElementById('rbar');
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  rbar.style.width = (d.scrollTop / (d.scrollHeight - d.clientHeight) * 100) + '%';
+}, {passive:true});
+
+/* ============================================================
+   HAMBURGER
+   ============================================================ */
+const hbg = document.getElementById('hbg');
+const mob = document.getElementById('mob-menu');
+hbg.addEventListener('click', () => {
+  hbg.classList.toggle('open');
+  mob.classList.toggle('open');
+});
+function cMob(){ hbg.classList.remove('open'); mob.classList.remove('open'); }
+
+/* ============================================================
+   ACCORDION
+   ============================================================ */
+function tAcc(head) {
+  const item = head.closest('.acc-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.acc-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+const rvEls = document.querySelectorAll('.rv');
+const rvObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); rvObs.unobserve(e.target); }});
+}, { threshold: 0.06 });
+rvEls.forEach(el => rvObs.observe(el));
+
+/* ============================================================
+   QUERY SPEED RACER — HERO INTERACTIVE
+   
+   Concept: drag slider = set row count.
+   ClickHouse and a row-store "race" to complete the query.
+   The ms values and bar widths update via RAF (one DOM write
+   per frame). The gap widens non-linearly as rows increase —
+   reflecting how columnar compression + vectorised execution
+   creates compounding advantages at scale.
+   
+   Performance: CSS transform:scaleX only (compositor layer).
+   will-change is set inline on the two bars.
+   No heavy JS per mouse event — slider input fires the RAF batch.
+   ============================================================ */
+
+const slider   = document.getElementById('qrSlider');
+const sliderVal = document.getElementById('sliderVal');
+const rowCountDisplay = document.getElementById('rowCountDisplay');
+const chMsEl   = document.getElementById('chMs');
+const rsMsEl   = document.getElementById('rsMs');
+const chBar    = document.getElementById('chBar');
+const rsBar    = document.getElementById('rsBar');
+const badgeEl  = document.getElementById('speedupBadge');
+
+// Map slider 0-100 to row counts (log scale for dramatic range)
+function sliderToRows(v) {
+  // 0 = 10M rows, 100 = 50B rows (log interpolation)
+  const minLog = Math.log10(10e6);   // 10M
+  const maxLog = Math.log10(50e9);   // 50B
+  return Math.pow(10, minLog + (v / 100) * (maxLog - minLog));
+}
+
+function formatRows(r) {
+  if (r >= 1e9) return (r / 1e9).toFixed(1) + 'B';
+  if (r >= 1e6) return (r / 1e6).toFixed(0) + 'M';
+  return r.toFixed(0);
+}
+
+// ClickHouse timing model: columnar, vectorised, compressed
+// Roughly: sub-linear growth due to columnar compression efficiency
+// Based on: ClickHouse published benchmarks (TPC-H, join benchmarks)
+function chTime(rows) {
+  // ~0.8ms per 100M rows, but compression means effective data shrinks
+  // At 1B rows: ~8ms, at 50B rows: ~280ms (not 400x — sub-linear scaling)
+  const baseMs = 0.8;
+  const compressionFactor = 0.65; // columnar compression reduces effective scan
+  return baseMs * (rows / 100e6) * Math.pow(compressionFactor, Math.log10(rows / 1e6));
+}
+
+// Row-store timing model: full-row scans, no compression
+// Roughly: linear scaling, much steeper curve
+function rsTime(rows) {
+  const baseMs = 12; // 12ms per 100M rows
+  return baseMs * (rows / 100e6);
+}
+
+// Clamp to max bar width = 1.0 (100%)
+// rsBar is relative to itself, chBar relative to rs
+let rafId = null;
+let currentCh = 0, currentRs = 0;
+let targetCh = 0, targetRs = 0;
+
+function easeOut(current, target, factor) {
+  return current + (target - current) * factor;
+}
+
+function rafLoop() {
+  currentCh = easeOut(currentCh, targetCh, 0.12);
+  currentRs = easeOut(currentRs, targetRs, 0.12);
+
+  const maxMs = Math.max(currentCh, currentRs);
+  const chScale = maxMs > 0 ? currentCh / maxMs : 0;
+  const rsScale = 1; // rs bar always full (it's the reference)
+
+  // One DOM write per frame — transform only (compositor)
+  chBar.style.transform = 'scaleX(' + chScale.toFixed(4) + ')';
+  rsBar.style.transform = 'scaleX(1)';
+
+  // Update text labels at throttled intervals
+  chMsEl.textContent = currentCh < 1000
+    ? currentCh.toFixed(1) + ' ms'
+    : (currentCh / 1000).toFixed(2) + ' s';
+  rsMsEl.textContent = currentRs < 1000
+    ? currentRs.toFixed(0) + ' ms'
+    : (currentRs / 1000).toFixed(1) + ' s';
+
+  const speedup = currentRs > 0 ? currentRs / currentCh : 0;
+  if (speedup > 1) {
+    badgeEl.textContent = speedup.toFixed(0) + '× faster than row-store';
+  }
+
+  // Continue until settled
+  if (Math.abs(currentCh - targetCh) > 0.05 || Math.abs(currentRs - targetRs) > 0.05) {
+    rafId = requestAnimationFrame(rafLoop);
+  } else {
+    rafId = null;
+  }
+}
+
+function updateWidget(v) {
+  const rows = sliderToRows(v);
+  const rowLabel = formatRows(rows);
+
+  sliderVal.textContent = rowLabel + ' rows';
+  rowCountDisplay.textContent = rowLabel;
+
+  targetCh = chTime(rows);
+  targetRs = rsTime(rows);
+
+  if (!rafId) rafId = requestAnimationFrame(rafLoop);
+}
+
+slider.addEventListener('input', () => {
+  updateWidget(parseInt(slider.value, 10));
+}, {passive:true});
+
+// Initial state
+updateWidget(50);
+</script>
+
+</body>
+</html>
